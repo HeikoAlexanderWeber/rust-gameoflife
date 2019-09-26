@@ -1,1 +1,1 @@
-# RUST template project
+# RUST Game of Life
