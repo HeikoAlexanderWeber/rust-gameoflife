@@ -117,7 +117,8 @@ impl InMemGameOfLife {
                 }
                 let idx_a = (coords.0 as i32) + x;
                 let idx_b = (coords.1 as i32) + y;
-                if idx_a < 0 || idx_b < 0 || idx_a >= (WORLD_SIZE.0 as i32) || idx_b >= (WORLD_SIZE.1 as i32) {
+                if idx_a < 0 || idx_b < 0 || 
+                   idx_a >= (WORLD_SIZE.0 as i32) || idx_b >= (WORLD_SIZE.1 as i32) {
                     continue;
                 }
                 if map.grid[idx_a as usize][idx_b as usize] {
