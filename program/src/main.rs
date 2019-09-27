@@ -45,12 +45,10 @@ trait Recorder {
     fn record(&mut self, data: (u64, World));
 }
 
-#[allow(dead_code)]
 struct StubRecorder {
 }
 
 impl StubRecorder {
-    #[allow(dead_code)]
     fn new() -> Self {
         StubRecorder{
         }
