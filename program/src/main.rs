@@ -1,36 +1,57 @@
+extern crate redis;
+use redis::Commands;
+
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
+
 #[macro_use]
 extern crate log;
 extern crate env_logger;
 
-//const WORLD_SIZE : usize = 64;
-const WORLD_SIZE: (usize, usize)  = (16, 64);
+const WORLD_SIZE: (usize, usize)  = (64, 16);
 
-#[derive(Copy, Clone)]
+#[derive(Clone, Serialize)]
 struct World {
-    grid: [[bool; WORLD_SIZE.1]; WORLD_SIZE.0],
+    grid: Vec<Vec<bool>>,
 }
 
 impl World {
     fn new() -> Self {
+        let mut x = Vec::with_capacity(WORLD_SIZE.0);
+        let y = [false; WORLD_SIZE.1].to_vec();
+        for _ in 0..WORLD_SIZE.0 {
+            x.push(y.clone());
+        }
         World {
-            grid: [[false; WORLD_SIZE.1]; WORLD_SIZE.0],
+            grid: x
         }
     }
 }
 
-struct Recorder {
-    data: Vec<(i32, World)>,
+trait Recorder {
+    fn record(&mut self, data: (i32, World));
 }
 
-impl Recorder {
-    fn new() -> Self {
-        Recorder{
-            data: Vec::new(),
-        }
-    }
+struct RedisRecorder {
+    conn: redis::Connection,
+}
 
+impl RedisRecorder {
+    fn new() -> redis::RedisResult<Self> {
+        let client = redis::Client::open("redis://localhost")?;
+        let conn = client.get_connection()?;
+        Ok(RedisRecorder{
+            conn,
+        })
+    }
+}
+
+impl Recorder for RedisRecorder {
     fn record(&mut self, data: (i32, World)) {
-        self.data.push(data);
+        self.conn.set::<String, String, String>(
+            data.0.to_string(), serde_json::to_string(&data.1).unwrap()).unwrap();
     }
 }
 
@@ -38,7 +59,7 @@ struct GameOfLife {
     state: i32,
     world: World,
     world_buffer: World,
-    recorder: Recorder,
+    recorder: Box<dyn Recorder>,
 }
 
 impl GameOfLife {
@@ -47,7 +68,7 @@ impl GameOfLife {
             state: 0,
             world: World::new(),
             world_buffer: World::new(),
-            recorder: Recorder::new(),
+            recorder: Box::new(RedisRecorder::new().unwrap()),
         }
 
     }
@@ -98,7 +119,7 @@ impl GameOfLife {
     }
 
     fn swap_buffers(&mut self) -> () {
-        std::mem::replace(&mut self.world, self.world_buffer);
+        std::mem::replace(&mut self.world, self.world_buffer.clone());
         self.recorder.record((self.state, self.world.clone()));
         self.state += 1;
     }
