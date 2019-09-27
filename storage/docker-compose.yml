@@ -1,0 +1,23 @@
+version: '3.3'
+
+services:
+    redis:
+        container_name: redis
+        hostname: redis
+        image: redis:latest
+        restart: unless-stopped
+        ports:
+            - 6379:6379
+
+    redis-commander:
+        container_name: redis-commander
+        hostname: redis-commander
+        image: rediscommander/redis-commander:latest
+        restart: unless-stopped
+        depends_on:
+            - redis
+        environment:
+            - REDIS_HOST=redis
+        ports:
+            - 6390:8081
+
