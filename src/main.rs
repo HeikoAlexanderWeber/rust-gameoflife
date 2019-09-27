@@ -78,7 +78,7 @@ impl GameOfLife {
                     let neighbours = self.get_neighbours((i, k), &self.world);
                     let mut alive = self.world.grid[i][k];
                     match neighbours {
-                        0...1 => {
+                        0..=1 => {
                             alive = false;
                         },
                         2 => {},
