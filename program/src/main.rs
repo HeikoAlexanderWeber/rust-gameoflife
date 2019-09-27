@@ -1,6 +1,8 @@
 extern crate uuid;
 use uuid::Uuid;
 
+extern crate clap;
+
 extern crate redis;
 use redis::Commands;
 
@@ -43,6 +45,22 @@ trait Recorder {
     fn record(&mut self, data: (u64, World));
 }
 
+#[allow(dead_code)]
+struct StubRecorder {
+}
+
+impl StubRecorder {
+    #[allow(dead_code)]
+    fn new() -> Self {
+        StubRecorder{
+        }
+    }
+}
+
+impl Recorder for StubRecorder {
+    fn record(&mut self, _: (u64, World)) {}
+}
+
 struct RedisRecorder {
     conn: redis::Connection,
 }
@@ -81,12 +99,12 @@ struct InMemGameOfLife {
 }
 
 impl InMemGameOfLife {
-    fn new() -> Self {
+    fn new(recorder: Box<dyn Recorder>) -> Self {
         InMemGameOfLife{
             state: 0,
             world: World::new(),
             world_buffer: World::new(),
-            recorder: Box::new(RedisRecorder::new().unwrap()),
+            recorder
         }
     }
 
@@ -193,7 +211,20 @@ fn main() -> std::io::Result<()> {
     env_logger::init();
     info!("Program is running.");
 
-    let mut gol = InMemGameOfLife::new();
+    let matches = clap::App::new("GameOfLife").arg(
+        clap::Arg::with_name("record")
+            .long("record")
+            .short("r")
+            .multiple(false))
+        .get_matches();
+    let do_record = matches.is_present("record");
+    let recorder: Box<dyn Recorder> = if do_record {
+        Box::new(RedisRecorder::new().unwrap())
+    } else {
+        Box::new(StubRecorder::new())
+    };
+
+    let mut gol = InMemGameOfLife::new(recorder);
     EntityFactory::glider((0, 0), &mut gol.world).unwrap();
 
     loop {
