@@ -2,17 +2,18 @@
 extern crate log;
 extern crate env_logger;
 
-const WORLD_SIZE: usize = 64;
+//const WORLD_SIZE : usize = 64;
+const WORLD_SIZE: (usize, usize)  = (16, 64);
 
 #[derive(Copy, Clone)]
 struct World {
-    grid: [[bool; WORLD_SIZE]; WORLD_SIZE],
+    grid: [[bool; WORLD_SIZE.1]; WORLD_SIZE.0],
 }
 
 impl World {
     fn new() -> Self {
         World {
-            grid: [[false; WORLD_SIZE]; WORLD_SIZE],
+            grid: [[false; WORLD_SIZE.1]; WORLD_SIZE.0],
         }
     }
 }
@@ -60,7 +61,7 @@ impl GameOfLife {
                 }
                 let idx_a = (coords.0 as i32) + x;
                 let idx_b = (coords.1 as i32) + y;
-                if idx_a < 0 || idx_b < 0 || idx_a >= (WORLD_SIZE as i32) || idx_b >= (WORLD_SIZE as i32) {
+                if idx_a < 0 || idx_b < 0 || idx_a >= (WORLD_SIZE.0 as i32) || idx_b >= (WORLD_SIZE.1 as i32) {
                     continue;
                 }
                 if map.grid[idx_a as usize][idx_b as usize] {
@@ -73,8 +74,8 @@ impl GameOfLife {
 
     fn simulate(&mut self, cnt: i32) -> () {
         for _ in 0..cnt {
-            for i in 0usize..WORLD_SIZE {
-                for k in 0usize..WORLD_SIZE {
+            for i in 0usize..WORLD_SIZE.0 {
+                for k in 0usize..WORLD_SIZE.1 {
                     let neighbours = self.get_neighbours((i, k), &self.world);
                     let mut alive = self.world.grid[i][k];
                     match neighbours {
@@ -104,11 +105,11 @@ impl GameOfLife {
 
     fn print(&self) -> std::io::Result<()> {
         let mut data = String::new();
-        for i in 0..WORLD_SIZE {
+        for i in 0..WORLD_SIZE.0 {
             let mut tmp_str = String::new();
-            for k in 0..WORLD_SIZE {
+            for k in 0..WORLD_SIZE.1 {
                 match self.world.grid[i][k] {
-                    true => tmp_str.push('o'),
+                    true => tmp_str.push('•'),
                     false => tmp_str.push(' '),
                 }
             }
@@ -131,8 +132,12 @@ struct EntityFactory {
 
 impl EntityFactory {
     fn glider(coords: (usize, usize), world: &mut World) -> std::result::Result<(), WorldBoundsError> {
-        let range = 0..WORLD_SIZE;
-        if !range.contains(&coords.0) || !range.contains(&(coords.0 +2)) || !range.contains(&coords.1) || !range.contains(&(coords.1 +2)) {
+        let range_x = 0..WORLD_SIZE.0;
+        let range_y = 0..WORLD_SIZE.1;
+        if !range_x.contains(&coords.0) || 
+           !range_x.contains(&(coords.0 +2)) || 
+           !range_y.contains(&coords.1) || 
+           !range_y.contains(&(coords.1 +2)) {
             return Err(WorldBoundsError{});
         }
         world.grid[coords.0+2][coords.1+0] = true;
