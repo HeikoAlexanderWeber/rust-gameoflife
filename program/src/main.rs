@@ -1,3 +1,6 @@
+extern crate uuid;
+use uuid::Uuid;
+
 extern crate redis;
 use redis::Commands;
 
@@ -10,22 +13,28 @@ extern crate serde_json;
 extern crate log;
 extern crate env_logger;
 
-const WORLD_SIZE: (usize, usize)  = (64, 16);
+const WORLD_SIZE: (usize, usize)  = (128, 128);
 
 #[derive(Clone, Serialize)]
 struct World {
+    id: String,
     grid: Vec<Vec<bool>>,
 }
 
 impl World {
     fn new() -> Self {
-        let mut x = Vec::with_capacity(WORLD_SIZE.0);
+        Self::new_with_id(Uuid::new_v4().to_string())
+    }
+
+    fn new_with_id(id: String) -> Self {
+        let mut grid = Vec::with_capacity(WORLD_SIZE.0);
         let y = [false; WORLD_SIZE.1].to_vec();
         for _ in 0..WORLD_SIZE.0 {
-            x.push(y.clone());
+            grid.push(y.clone());
         }
         World {
-            grid: x
+            id,
+            grid
         }
     }
 }
@@ -50,7 +59,9 @@ impl RedisRecorder {
 
 impl Recorder for RedisRecorder {
     fn record(&mut self, data: (i32, World)) {
-        let mut key = "iteration:".to_owned();
+        let mut key = "gameoflife:iteration:".to_owned();
+        key.push_str(&data.1.id.to_string());
+        key.push(':');
         key.push_str(&data.0.to_string());
         self.conn.set::<String, String, String>(
             key, serde_json::to_string(&data.1).unwrap()).unwrap();
@@ -77,7 +88,6 @@ impl InMemGameOfLife {
             world_buffer: World::new(),
             recorder: Box::new(RedisRecorder::new().unwrap()),
         }
-
     }
 
     fn get_neighbours(&self, coords: (usize, usize), map: &World) -> u8 {
@@ -188,7 +198,7 @@ fn main() -> std::io::Result<()> {
 
     loop {
         gol.print().unwrap();
-        std::thread::sleep(std::time::Duration::from_millis(10));
+        //std::thread::sleep(std::time::Duration::from_millis(10));
         // glider needs 4 iterations to return to default state
         // after going forward 1 step
         gol.simulate(4);

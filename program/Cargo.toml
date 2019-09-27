@@ -5,6 +5,7 @@ authors = ["Heiko Alexander Weber <heiko.a.weber@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+uuid = { version = "0.7", features = ["serde", "v4"] }
 log = "0.4.8"
 env_logger = "0.7.0"
 redis = "0.12.0"
