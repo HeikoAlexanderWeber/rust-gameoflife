@@ -18,12 +18,6 @@ endif
 
 .PHONY: update upgrade build run
 
-update:
-	cargo update
-
-upgrade:
-	cargo upgrade
-
 build:
 	echo ${VERSION}
 	cargo build
