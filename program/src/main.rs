@@ -129,7 +129,7 @@ impl InMemGameOfLife {
     }
 
     fn swap_buffers(&mut self) -> () {
-        std::mem::replace(&mut self.world, self.world_buffer.clone());
+        self.world = self.world_buffer.clone();
         self.recorder.record((self.state, self.world.clone()));
         self.state += 1;
     }
