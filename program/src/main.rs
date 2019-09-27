@@ -40,7 +40,7 @@ impl World {
 }
 
 trait Recorder {
-    fn record(&mut self, data: (i32, World));
+    fn record(&mut self, data: (u64, World));
 }
 
 struct RedisRecorder {
@@ -58,7 +58,7 @@ impl RedisRecorder {
 }
 
 impl Recorder for RedisRecorder {
-    fn record(&mut self, data: (i32, World)) {
+    fn record(&mut self, data: (u64, World)) {
         let mut key = "gameoflife:iteration:".to_owned();
         key.push_str(&data.1.id.to_string());
         key.push(':');
@@ -69,12 +69,12 @@ impl Recorder for RedisRecorder {
 }
 
 trait GameOfLife {
-    fn simulate(&mut self, cnt: i32) -> ();
+    fn simulate(&mut self, cnt: u64) -> ();
     fn print(&self) -> std::io::Result<()>;
 }
 
 struct InMemGameOfLife {
-    state: i32,
+    state: u64,
     world: World,
     world_buffer: World,
     recorder: Box<dyn Recorder>,
@@ -118,7 +118,7 @@ impl InMemGameOfLife {
 }
 
 impl GameOfLife for InMemGameOfLife {
-    fn simulate(&mut self, cnt: i32) -> () {
+    fn simulate(&mut self, cnt: u64) -> () {
         for _ in 0..cnt {
             for i in 0usize..WORLD_SIZE.0 {
                 for k in 0usize..WORLD_SIZE.1 {
