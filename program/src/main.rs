@@ -50,21 +50,28 @@ impl RedisRecorder {
 
 impl Recorder for RedisRecorder {
     fn record(&mut self, data: (i32, World)) {
+        let mut key = "iteration:".to_owned();
+        key.push_str(&data.0.to_string());
         self.conn.set::<String, String, String>(
-            data.0.to_string(), serde_json::to_string(&data.1).unwrap()).unwrap();
+            key, serde_json::to_string(&data.1).unwrap()).unwrap();
     }
 }
 
-struct GameOfLife {
+trait GameOfLife {
+    fn simulate(&mut self, cnt: i32) -> ();
+    fn print(&self) -> std::io::Result<()>;
+}
+
+struct InMemGameOfLife {
     state: i32,
     world: World,
     world_buffer: World,
     recorder: Box<dyn Recorder>,
 }
 
-impl GameOfLife {
+impl InMemGameOfLife {
     fn new() -> Self {
-        GameOfLife{
+        InMemGameOfLife{
             state: 0,
             world: World::new(),
             world_buffer: World::new(),
@@ -93,6 +100,14 @@ impl GameOfLife {
         count
     }
 
+    fn swap_buffers(&mut self) -> () {
+        std::mem::replace(&mut self.world, self.world_buffer.clone());
+        self.recorder.record((self.state, self.world.clone()));
+        self.state += 1;
+    }
+}
+
+impl GameOfLife for InMemGameOfLife {
     fn simulate(&mut self, cnt: i32) -> () {
         for _ in 0..cnt {
             for i in 0usize..WORLD_SIZE.0 {
@@ -116,12 +131,6 @@ impl GameOfLife {
             }
             self.swap_buffers();
         }
-    }
-
-    fn swap_buffers(&mut self) -> () {
-        std::mem::replace(&mut self.world, self.world_buffer.clone());
-        self.recorder.record((self.state, self.world.clone()));
-        self.state += 1;
     }
 
     fn print(&self) -> std::io::Result<()> {
@@ -174,7 +183,7 @@ fn main() -> std::io::Result<()> {
     env_logger::init();
     info!("Program is running.");
 
-    let mut gol = GameOfLife::new();
+    let mut gol = InMemGameOfLife::new();
     EntityFactory::glider((0, 0), &mut gol.world).unwrap();
 
     loop {
