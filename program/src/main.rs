@@ -12,58 +12,20 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate typetag;
 
+use std::borrow::Borrow;
 use uuid::Uuid;
-use redis::Commands;
 
 pub mod world;
+pub mod recorder;
 use world::{
     in_mem_world::InMemWorld, 
     world::{World, BoundsError}};
+use recorder::{
+    recorder::Recorder, 
+    stub_recorder::StubRecorder,
+    redis_recorder::RedisRecorder};
 
 const WORLD_SIZE: (usize, usize)  = (16, 16);
-
-trait Recorder {
-    fn record(&mut self, data: (u64, &Box<dyn World>));
-}
-
-struct StubRecorder {
-}
-
-impl StubRecorder {
-    fn new() -> Self {
-        Self{
-        }
-    }
-}
-
-impl Recorder for StubRecorder {
-    fn record(&mut self, _: (u64, &Box<dyn World>)) {}
-}
-
-struct RedisRecorder {
-    conn: redis::Connection,
-}
-
-impl RedisRecorder {
-    fn new() -> redis::RedisResult<Self> {
-        let client = redis::Client::open("redis://localhost")?;
-        let conn = client.get_connection()?;
-        Ok(Self {
-            conn,
-        })
-    }
-}
-
-impl Recorder for RedisRecorder {
-    fn record(&mut self, data: (u64, &Box<dyn World>)) {
-        let mut key = "gameoflife:iteration:".to_owned();
-        key.push_str(&data.1.get_id().to_string());
-        key.push(':');
-        key.push_str(&data.0.to_string());
-        self.conn.set::<String, String, String>(
-            key, serde_json::to_string(&data.1).unwrap()).unwrap();
-    }
-}
 
 struct GameOfLife {
     state: u64,
@@ -87,7 +49,7 @@ impl GameOfLife {
 
     fn swap_buffers(&mut self) -> () {
         std::mem::swap(&mut self.world, &mut self.world_buffer);
-        self.recorder.record((self.state, &self.world));
+        self.recorder.record((self.state.to_string().as_ref(), self.world.borrow()));
         self.state += 1;
     }
 
