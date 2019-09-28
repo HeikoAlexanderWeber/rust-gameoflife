@@ -55,6 +55,18 @@ impl World for InMemWorld {
         }
     }
 
+    fn set_span(&mut self, span: (std::ops::Range::<usize>, std::ops::Range::<usize>), alive: bool) -> Result<(), BoundsError> {
+        for x in span.0.clone() {
+            for y in span.1.clone() {
+                match self.set(&(x, y), alive) {
+                    Ok(_) => (),
+                    Err(e) => return Err(e),
+                }
+            }
+        }
+        Ok(())
+    }
+
     fn get_neighbours(&self, coords: &(usize, usize)) -> u8 {
         let mut count = 0;
         for x in -1i32..2 {
