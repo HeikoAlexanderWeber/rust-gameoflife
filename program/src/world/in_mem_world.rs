@@ -34,7 +34,7 @@ impl World for InMemWorld {
     }
 
     fn get(&self, coords: &(usize, usize)) -> Result<bool, BoundsError> {
-        let result = std::panic::catch_unwind(|| {
+        let result = std::panic::catch_unwind(|| { // catches possible out-of-bounds array access
             self.grid[coords.0][coords.1]
         });
         return match result {
