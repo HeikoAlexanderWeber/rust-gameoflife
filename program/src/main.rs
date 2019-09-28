@@ -65,19 +65,14 @@ impl Recorder for RedisRecorder {
     }
 }
 
-trait GameOfLife {
-    fn simulate(&mut self, cnt: u64) -> ();
-    fn print(&self) -> std::io::Result<()>;
-}
-
-struct InMemGameOfLife {
+struct GameOfLife {
     state: u64,
     world: Box<dyn World>,
     world_buffer: Box<dyn World>,
     recorder: Box<dyn Recorder>,
 }
 
-impl InMemGameOfLife {
+impl GameOfLife {
     fn new(recorder: Box<dyn Recorder>) -> Self {
         let world_id = Uuid::new_v4().to_string().to_owned();
         let world = Box::new(InMemWorld::new(world_id, WORLD_SIZE));
@@ -95,9 +90,7 @@ impl InMemGameOfLife {
         self.recorder.record((self.state, &self.world));
         self.state += 1;
     }
-}
 
-impl GameOfLife for InMemGameOfLife {
     fn simulate(&mut self, cnt: u64) -> () {
         for _ in 0..cnt {
             for i in 0usize..WORLD_SIZE.0 {
@@ -175,7 +168,7 @@ fn main() -> std::io::Result<()> {
         Box::new(StubRecorder::new())
     };
 
-    let mut gol = InMemGameOfLife::new(recorder);
+    let mut gol = GameOfLife::new(recorder);
     EntityFactory::glider((0, 0), &mut gol.world).unwrap();
 
     loop {
