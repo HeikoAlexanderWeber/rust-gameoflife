@@ -10,18 +10,20 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+extern crate typetag;
 
 use uuid::Uuid;
 use redis::Commands;
 
 pub mod world;
-use world::world::{World, BoundsError};
-use world::in_mem_world::InMemWorld;
+use world::{
+    in_mem_world::InMemWorld, 
+    world::{World, BoundsError}};
 
-const WORLD_SIZE: (usize, usize)  = (128, 128);
+const WORLD_SIZE: (usize, usize)  = (16, 16);
 
 trait Recorder {
-    fn record(&mut self, data: (u64, &InMemWorld));
+    fn record(&mut self, data: (u64, &Box<dyn World>));
 }
 
 struct StubRecorder {
@@ -35,7 +37,7 @@ impl StubRecorder {
 }
 
 impl Recorder for StubRecorder {
-    fn record(&mut self, _: (u64, &InMemWorld)) {}
+    fn record(&mut self, _: (u64, &Box<dyn World>)) {}
 }
 
 struct RedisRecorder {
@@ -53,7 +55,7 @@ impl RedisRecorder {
 }
 
 impl Recorder for RedisRecorder {
-    fn record(&mut self, data: (u64, &InMemWorld)) {
+    fn record(&mut self, data: (u64, &Box<dyn World>)) {
         let mut key = "gameoflife:iteration:".to_owned();
         key.push_str(&data.1.get_id().to_string());
         key.push(':');
@@ -70,15 +72,15 @@ trait GameOfLife {
 
 struct InMemGameOfLife {
     state: u64,
-    world: InMemWorld,
-    world_buffer: InMemWorld,
+    world: Box<dyn World>,
+    world_buffer: Box<dyn World>,
     recorder: Box<dyn Recorder>,
 }
 
 impl InMemGameOfLife {
     fn new(recorder: Box<dyn Recorder>) -> Self {
         let world_id = Uuid::new_v4().to_string().to_owned();
-        let world = InMemWorld::new(world_id, WORLD_SIZE);
+        let world = Box::new(InMemWorld::new(world_id, WORLD_SIZE));
         let world_buffer = world.clone();
         Self {
             state: 0,
@@ -146,7 +148,7 @@ struct EntityFactory {
 }
 
 impl EntityFactory {
-    fn glider(coords: (usize, usize), world: &mut InMemWorld) -> std::result::Result<(), BoundsError> {
+    fn glider(coords: (usize, usize), world: &mut Box<dyn World>) -> std::result::Result<(), BoundsError> {
         world.set(&(coords.0+2, coords.1+0), true)?;
         world.set(&(coords.0+2, coords.1+1), true)?;
         world.set(&(coords.0+2, coords.1+2), true)?;

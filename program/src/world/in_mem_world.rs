@@ -1,6 +1,6 @@
 use crate::world::world::{World, BoundsError};
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct InMemWorld {
     #[allow(dead_code)] // id is not needed here
     id: String,
@@ -16,7 +16,7 @@ impl InMemWorld {
         for _ in 0..bounds.0 {
             grid.push(y.clone());
         }
-        Self {
+        InMemWorld {
             id,
             bounds,
             grid
@@ -24,6 +24,7 @@ impl InMemWorld {
     }
 }
 
+#[typetag::serde]
 impl World for InMemWorld {
     fn get_id(&self) -> String {
         self.id.clone()

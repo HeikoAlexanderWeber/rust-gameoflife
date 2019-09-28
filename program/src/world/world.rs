@@ -4,6 +4,7 @@ use std::ops::Range;
 #[derive(Debug, Clone)]
 pub struct BoundsError;
 
+#[typetag::serde(tag = "type")]
 pub trait World {
     fn get_id(&self) -> String;
     fn get_bounds(&self) -> (usize, usize);
