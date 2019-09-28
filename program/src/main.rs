@@ -75,7 +75,7 @@ impl GameOfLife {
         }
     }
 
-    fn print(&self) -> std::io::Result<()> {
+    fn print(&self) {
         let mut data = String::new();
         for i in 0..self.world.get_bounds().0 {
             let mut tmp_str = String::new();
@@ -92,7 +92,6 @@ impl GameOfLife {
         }
         
         println!("{}", data);
-        Ok(())
     }
 }
 
@@ -129,7 +128,7 @@ fn main() -> std::io::Result<()> {
     EntityFactory::glider((0, 0), &mut gol.world).unwrap();
 
     loop {
-        gol.print().unwrap();
+        gol.print();
         std::thread::sleep(std::time::Duration::from_millis(200));
         // glider needs 4 iterations to return to default state
         // after going forward 1 step
