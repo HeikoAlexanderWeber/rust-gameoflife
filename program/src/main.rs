@@ -19,7 +19,7 @@ pub mod world;
 use world::world::{World, BoundsError};
 use world::in_mem_world::InMemWorld;
 
-const WORLD_SIZE: (usize, usize)  = (128, 128);
+const WORLD_SIZE: (usize, usize)  = (16, 16);
 
 trait Recorder {
     fn record(&mut self, data: (u64, InMemWorld));
@@ -112,7 +112,7 @@ impl GameOfLife for InMemGameOfLife {
                             alive = false;
                         },
                     }
-                    self.world.set(&(i, k), alive).unwrap();
+                    self.world_buffer.set(&(i, k), alive).unwrap();
                 }
             }
             self.swap_buffers();
@@ -179,9 +179,9 @@ fn main() -> std::io::Result<()> {
 
     loop {
         gol.print().unwrap();
-        //std::thread::sleep(std::time::Duration::from_millis(10));
+        std::thread::sleep(std::time::Duration::from_millis(200));
         // glider needs 4 iterations to return to default state
         // after going forward 1 step
-        gol.simulate(4);
+        gol.simulate(1);
     }
 }
