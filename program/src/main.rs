@@ -16,10 +16,10 @@ use std::borrow::Borrow;
 use uuid::Uuid;
 
 pub mod world;
-pub mod recorder;
 use world::{
     in_mem_world::InMemWorld, 
     world::{World, BoundsError}};
+pub mod recorder;
 use recorder::{
     recorder::Recorder, 
     stub_recorder::StubRecorder,
