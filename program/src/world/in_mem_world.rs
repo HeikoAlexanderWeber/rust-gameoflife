@@ -43,16 +43,13 @@ impl World for InMemWorld {
     }
 
     fn set(&mut self, coords: &(usize, usize), alive: bool) -> Result<bool, BoundsError> {
-        let result = std::panic::catch_unwind(|| {
-            self.get(coords).unwrap()
-        });
-        return match result {
+        return match self.get(coords) {
             Ok(v) => {
                 self.grid[coords.0][coords.1] = alive;
                 Ok(v)
             }
             Err(_) => Err(BoundsError{})
-        }
+        };
     }
 
     fn set_span(&mut self, span: (std::ops::Range::<usize>, std::ops::Range::<usize>), alive: bool) -> Result<(), BoundsError> {
