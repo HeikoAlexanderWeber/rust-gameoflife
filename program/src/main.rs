@@ -21,7 +21,7 @@ use world::in_mem_world::InMemWorld;
 const WORLD_SIZE: (usize, usize)  = (128, 128);
 
 trait Recorder {
-    fn record(&mut self, data: (u64, InMemWorld));
+    fn record(&mut self, data: (u64, &InMemWorld));
 }
 
 struct StubRecorder {
@@ -35,7 +35,7 @@ impl StubRecorder {
 }
 
 impl Recorder for StubRecorder {
-    fn record(&mut self, _: (u64, InMemWorld)) {}
+    fn record(&mut self, _: (u64, &InMemWorld)) {}
 }
 
 struct RedisRecorder {
@@ -53,7 +53,7 @@ impl RedisRecorder {
 }
 
 impl Recorder for RedisRecorder {
-    fn record(&mut self, data: (u64, InMemWorld)) {
+    fn record(&mut self, data: (u64, &InMemWorld)) {
         let mut key = "gameoflife:iteration:".to_owned();
         key.push_str(&data.1.get_id().to_string());
         key.push(':');
@@ -89,8 +89,8 @@ impl InMemGameOfLife {
     }
 
     fn swap_buffers(&mut self) -> () {
-        self.world = self.world_buffer.clone();
-        self.recorder.record((self.state, self.world.clone()));
+        std::mem::swap(&mut self.world, &mut self.world_buffer);
+        self.recorder.record((self.state, &self.world));
         self.state += 1;
     }
 }
