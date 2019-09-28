@@ -134,12 +134,7 @@ impl GameOfLife {
     }
 }
 
-#[derive(Debug, Clone)]
-struct WorldBoundsError;
-
-struct EntityFactory {
-}
-
+struct EntityFactory;
 impl EntityFactory {
     fn glider(coords: (usize, usize), world: &mut Box<dyn World>) -> std::result::Result<(), BoundsError> {
         world.set(&(coords.0+2, coords.1+0), true)?;
