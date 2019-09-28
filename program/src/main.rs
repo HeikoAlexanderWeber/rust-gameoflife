@@ -93,8 +93,8 @@ impl GameOfLife {
 
     fn simulate(&mut self, cnt: u64) -> () {
         for _ in 0..cnt {
-            for i in 0usize..WORLD_SIZE.0 {
-                for k in 0usize..WORLD_SIZE.1 {
+            for i in 0usize..self.world.get_bounds().0 {
+                for k in 0usize..self.world.get_bounds().1 {
                     let neighbours = self.world.get_neighbours(&(i, k));
                     let mut alive = self.world.get(&(i, k)).unwrap();
                     match neighbours {
@@ -115,9 +115,9 @@ impl GameOfLife {
 
     fn print(&self) -> std::io::Result<()> {
         let mut data = String::new();
-        for i in 0..WORLD_SIZE.0 {
+        for i in 0..self.world.get_bounds().0 {
             let mut tmp_str = String::new();
-            for k in 0..WORLD_SIZE.1 {
+            for k in 0..self.world.get_bounds().1 {
                 match self.world.get(&(i, k)).unwrap() {
                     true => tmp_str.push('•'),
                     false => tmp_str.push(' '),

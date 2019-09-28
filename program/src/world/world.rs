@@ -7,7 +7,7 @@ pub struct BoundsError;
 #[typetag::serde(tag = "type")]
 pub trait World {
     fn get_id(&self) -> String;
-    fn get_bounds(&self) -> (usize, usize);
+    fn get_bounds(&self) -> &(usize, usize);
 
     fn get(&self, coords: &(usize, usize)) -> Result<bool, BoundsError>;
     fn set(&mut self, coords: &(usize, usize), alive: bool) -> Result<bool, BoundsError>;

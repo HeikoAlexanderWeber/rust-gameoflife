@@ -29,8 +29,8 @@ impl World for InMemWorld {
     fn get_id(&self) -> String {
         self.id.clone()
     }
-    fn get_bounds(&self) -> (usize, usize) {
-        self.bounds.clone()
+    fn get_bounds(&self) -> &(usize, usize) {
+        &self.bounds
     }
 
     fn get(&self, coords: &(usize, usize)) -> Result<bool, BoundsError> {
