@@ -1,19 +1,18 @@
+#[macro_use]
+extern crate log;
+extern crate env_logger;
+
 extern crate uuid;
-use uuid::Uuid;
-
 extern crate clap;
-
 extern crate redis;
-use redis::Commands;
 
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
 
-#[macro_use]
-extern crate log;
-extern crate env_logger;
+use uuid::Uuid;
+use redis::Commands;
 
 pub mod world;
 use world::world::{World, BoundsError};
