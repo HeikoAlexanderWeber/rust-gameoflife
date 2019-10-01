@@ -54,7 +54,7 @@ impl World for InMemWorld {
     }
 
     fn set_span(&mut self, span: (std::ops::Range::<usize>, std::ops::Range::<usize>), alive: bool) -> Result<(), BoundsError> {
-        for x in span.0.clone() {
+        for x in span.0 {
             for y in span.1.clone() {
                 match self.set(&(x, y), alive) {
                     Ok(_) => (),
