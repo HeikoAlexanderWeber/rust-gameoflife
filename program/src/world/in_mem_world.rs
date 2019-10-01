@@ -16,7 +16,7 @@ impl InMemWorld {
         for _ in 0..bounds.0 {
             grid.push(y.clone());
         }
-        InMemWorld {
+        Self {
             id,
             bounds,
             grid
