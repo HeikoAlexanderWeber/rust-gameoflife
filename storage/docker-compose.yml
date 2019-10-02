@@ -19,5 +19,5 @@ services:
         environment:
             - REDIS_HOST=redis
         ports:
-            - 6390:8081
+            - 6380:8081
 
