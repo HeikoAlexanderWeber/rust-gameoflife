@@ -35,9 +35,9 @@ struct GameOfLife {
 }
 
 impl GameOfLife {
-    fn new(recorder: Box<dyn Recorder>) -> Self {
+    fn new(size: (usize, usize), recorder: Box<dyn Recorder>) -> Self {
         let world_id = Uuid::new_v4().to_string().to_owned();
-        let world = Box::new(InMemWorld::new(world_id, WORLD_SIZE));
+        let world = Box::new(InMemWorld::new(world_id, size));
         let world_buffer = world.clone();
         Self {
             state: 0,
@@ -116,15 +116,29 @@ fn main() -> std::io::Result<()> {
             .long("record")
             .short("r")
             .multiple(false))
+        .arg(
+            clap::Arg::with_name("size")
+			.long("size")
+			.short("s")
+			.multiple(false)
+            .takes_value(true))
         .get_matches();
     let do_record = matches.is_present("record");
+	let size = match matches.value_of("size") {
+        Some(s) => {
+            let xy: Vec<&str> = s.split(":").collect();
+            (xy[0].parse::<usize>().unwrap(), xy[1].parse::<usize>().unwrap())
+        },
+        None => WORLD_SIZE,
+    };
+
     let recorder: Box<dyn Recorder> = if do_record {
         Box::new(RedisRecorder::new().unwrap())
     } else {
         Box::new(StubRecorder::new())
     };
 
-    let mut gol = GameOfLife::new(recorder);
+    let mut gol = GameOfLife::new(size, recorder);
     EntityFactory::glider((0, 0), &mut gol.world).unwrap();
 
     loop {
