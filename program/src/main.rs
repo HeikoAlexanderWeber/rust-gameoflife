@@ -111,16 +111,15 @@ fn main() -> std::io::Result<()> {
     env_logger::init();
     info!("Program is running.");
 
-    let matches = clap::App::new("GameOfLife").arg(
-        clap::Arg::with_name("record")
+    let matches = clap::App::new("GameOfLife")
+        .arg(clap::Arg::with_name("record")
             .long("record")
             .short("r")
             .multiple(false))
-        .arg(
-            clap::Arg::with_name("size")
-			.long("size")
-			.short("s")
-			.multiple(false)
+        .arg(clap::Arg::with_name("size")
+            .long("size")
+            .short("s")
+            .multiple(false)
             .takes_value(true))
         .get_matches();
     let do_record = matches.is_present("record");
