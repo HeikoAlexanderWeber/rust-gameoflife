@@ -123,7 +123,7 @@ fn main() -> std::io::Result<()> {
             .takes_value(true))
         .get_matches();
     let do_record = matches.is_present("record");
-	let size = match matches.value_of("size") {
+    let size = match matches.value_of("size") {
         Some(s) => {
             let xy: Vec<&str> = s.split(":").collect();
             (xy[0].parse::<usize>().unwrap(), xy[1].parse::<usize>().unwrap())
