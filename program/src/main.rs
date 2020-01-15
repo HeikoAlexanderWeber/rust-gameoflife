@@ -81,8 +81,8 @@ impl GameOfLife {
             let mut tmp_str = String::new();
             for k in 0..self.world.get_bounds().1 {
                 match self.world.get(&(i, k)).unwrap() {
-                    true => tmp_str.push('•'),
-                    false => tmp_str.push(' '),
+                    true => tmp_str.push('X'),
+                    false => tmp_str.push('.'),
                 }
             }
             if tmp_str.trim().len() != 0 {
@@ -142,9 +142,9 @@ fn main() -> std::io::Result<()> {
 
     loop {
         gol.print();
-        std::thread::sleep(std::time::Duration::from_millis(200));
+        std::thread::sleep(std::time::Duration::from_millis(50));
         // glider needs 4 iterations to return to default state
         // after going forward 1 step
-        gol.simulate(4);
+        gol.simulate(1);
     }
 }
